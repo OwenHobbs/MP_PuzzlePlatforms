@@ -9,12 +9,25 @@ AMovingPlatform::AMovingPlatform()
 	SetMobility(EComponentMobility::Movable);
 }
 
+void AMovingPlatform::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority()) // Only run code on Server
+	{
+		// Send updates to the client(s)
+		SetReplicates(true);
+		SetReplicateMovement(true);
+	}
+}
+
 void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasAuthority()) 
+	if (HasAuthority()) // Only run code on Server
 	{
+		// Move the platform (on the server)
 		FVector Location = GetActorLocation();
 		Location += FVector(Speed * DeltaTime, 0, 0);
 		SetActorLocation(Location);
