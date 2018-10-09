@@ -13,9 +13,8 @@ void AMovingPlatform::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority()) // Only run code on Server
+	if (HasAuthority())
 	{
-		// Send updates to the client(s)
 		SetReplicates(true);
 		SetReplicateMovement(true);
 	}
@@ -25,11 +24,12 @@ void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasAuthority()) // Only run code on Server
+	if (HasAuthority())
 	{
-		// Move the platform (on the server)
 		FVector Location = GetActorLocation();
-		Location += FVector(Speed * DeltaTime, 0, 0);
+		FVector GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
+		FVector Direction = (GlobalTargetLocation - Location).GetSafeNormal();
+		Location += Speed * DeltaTime * Direction;
 		SetActorLocation(Location);
 	}
 }
